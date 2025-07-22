@@ -6,6 +6,7 @@ from ..models.models import create_task, create_history_log
 
 task_bp = Blueprint('tasks', __name__, url_prefix="/task")
 
+# Create a new task
 @task_bp.route('/create', methods=['POST'])
 @jwt_required()
 def create_task_route():
@@ -28,6 +29,7 @@ def create_task_route():
     db.logs.insert_one(create_history_log("create", user_id, {"title": task["title"]}))
     return jsonify({"msg": "Task created"}), 201
 
+# Get all tasks for the current user
 @task_bp.route('/all', methods=['GET'])
 @jwt_required()
 def get_tasks():
@@ -60,7 +62,7 @@ def get_tasks():
 
     return jsonify([objectid_to_str(t) for t in tasks]), 200
 
-
+# Get a specific task by ID
 @task_bp.route('/<task_id>', methods=['PUT'])
 @jwt_required()
 def update_task(task_id):
@@ -94,6 +96,7 @@ def update_task(task_id):
     db.logs.insert_one(create_history_log("update", user_id, {"task_id": str(task_id), "changes": update_data}))
     return jsonify({"msg": "Task updated"}), 200
 
+# Delete a task
 @task_bp.route('/<task_id>', methods=['DELETE'])
 @jwt_required()
 def delete_task(task_id):
@@ -109,6 +112,7 @@ def delete_task(task_id):
     db.logs.insert_one(create_history_log("delete", user_id, {"task_id": str(task_id)}))
     return jsonify({"msg": "Task deleted"}), 200
 
+# Get user logs
 @task_bp.route('/logs', methods=['GET'])
 @jwt_required()
 def get_user_logs():
@@ -117,7 +121,7 @@ def get_user_logs():
     logs = list(db.logs.find({"updated_by": user_id}, {"_id": 0}))
     return jsonify(logs), 200
 
-
+# Get due date and description by task ID
 @task_bp.route('/<task_id>/due', methods=['GET'])
 @jwt_required()
 def get_due_by_task_id(task_id):
@@ -142,7 +146,7 @@ def get_due_by_task_id(task_id):
         "description": task.get("description", "")
     }), 200
 
-
+# Upload a file to a task
 @task_bp.route('/<task_id>/upload', methods=['POST'])
 @jwt_required()
 def upload_file(task_id):
