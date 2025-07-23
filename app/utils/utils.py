@@ -16,11 +16,24 @@ def get_user_id():
     """
     return get_jwt_identity()
 
+def get_user_role():
+    """
+    Retrieve the role of the current user from the database using their JWT identity.
+    """
+    db = get_db()
+    user_id = get_user_id()
+    user = db.users.find_one({"_id": ObjectId(user_id)}, {"role": 1})
+    return user.get("role") if user else None
+
 def objectid_to_str(doc):
     """
     Convert MongoDB _id from ObjectId to string for JSON response.
     """
     doc["_id"] = str(doc["_id"])
+    if "user_id" in doc:
+        doc["user_id"] = str(doc["user_id"])
+    if "assigned_to" in doc:
+        doc["assigned_to"] = str(doc["assigned_to"])
     return doc
 
 def validate_objectid(id_str):
